@@ -5,6 +5,7 @@ import asyncio
 import aiohttp
 from interfaces.video_output import VideoOutput
 from utils.image import image_path_to_b64
+from utils.rate_limiter import RateLimiter
 
 
 class VideoGeneratorVeoYunwuAPI:
@@ -14,6 +15,7 @@ class VideoGeneratorVeoYunwuAPI:
         t2v_model: str = "veo3.1-fast",  # text to video
         ff2v_model: str = "veo3.1-fast",   # first frame to video
         flf2v_model: str = "veo2-fast-frames",  # first and last frame to video
+        rate_limiter: Optional[RateLimiter] = None,
     ):
         """
         all models:
@@ -36,6 +38,7 @@ class VideoGeneratorVeoYunwuAPI:
         self.t2v_model = t2v_model
         self.ff2v_model = ff2v_model
         self.flf2v_model = flf2v_model
+        self.rate_limiter = rate_limiter
 
     async def generate_single_video(
         self,
@@ -54,6 +57,10 @@ class VideoGeneratorVeoYunwuAPI:
             raise ValueError("The number of reference images must be no more than 2")
 
         logging.info(f"Calling {model} to generate video...")
+
+        # Apply rate limiting if configured
+        if self.rate_limiter:
+            await self.rate_limiter.acquire()
 
         # 1. Create video generation task
         payload = {

@@ -8,13 +8,15 @@ from google.genai import types
 from tenacity import retry, stop_after_attempt
 from interfaces.image_output import ImageOutput
 from utils.retry import after_func
+from utils.rate_limiter import RateLimiter
 
 
 class ImageGeneratorNanobananaYunwuAPI:
     def __init__(
         self,
         api_key: str,
-        model: str = "gemini-2.5-flash-image-preview",
+        model: str = "gemini-3.1-flash-image-preview",
+        rate_limiter: Optional[RateLimiter] = None,
     ):
         self.client = genai.Client(
             api_key=api_key,
@@ -24,6 +26,7 @@ class ImageGeneratorNanobananaYunwuAPI:
             ),
         )
         self.model = model
+        self.rate_limiter = rate_limiter
 
 
     @retry(stop=stop_after_attempt(3), after=after_func)
@@ -39,6 +42,10 @@ class ImageGeneratorNanobananaYunwuAPI:
         """
 
         logging.info(f"Calling {self.model} to generate image...")
+
+        # Apply rate limiting if configured
+        if self.rate_limiter:
+            await self.rate_limiter.acquire()
 
         reference_images = [Image.open(path) for path in reference_image_paths]
 

@@ -20,7 +20,7 @@ style = "Realistic, warm feel"
 
 async def main():
     pipeline = Idea2VideoPipeline.init_from_config(
-        config_path="configs/idea2video.yaml")
+        config_path="configs/idea2video_yunwu.yaml")
     await pipeline(idea=idea, user_requirement=user_requirement, style=style)
 
 if __name__ == "__main__":

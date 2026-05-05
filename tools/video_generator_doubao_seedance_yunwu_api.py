@@ -1,9 +1,10 @@
 import logging
-from typing import List, Literal
+from typing import List, Literal, Optional
 import asyncio
 import aiohttp
 from interfaces.video_output import VideoOutput
 from utils.image import image_path_to_b64
+from utils.rate_limiter import RateLimiter
 
 
 class VideoGeneratorDoubaoSeedanceYunwuAPI:
@@ -13,11 +14,13 @@ class VideoGeneratorDoubaoSeedanceYunwuAPI:
         t2v_model: str = "doubao-seedance-1-0-lite-t2v-250428",
         ff2v_model: str = "doubao-seedance-1-0-lite-i2v-250428",
         flf2v_model: str = "doubao-seedance-1-0-lite-i2v-250428",
+        rate_limiter: Optional[RateLimiter] = None,
     ):
         self.api_key = api_key
         self.t2v_model = t2v_model
         self.ff2v_model = ff2v_model
         self.flf2v_model = flf2v_model
+        self.rate_limiter = rate_limiter
 
 
     async def create_video_generation_task(
@@ -172,6 +175,10 @@ class VideoGeneratorDoubaoSeedanceYunwuAPI:
         Returns:
             VideoOutput containing the video URL
         """
+        # Apply rate limiting if configured
+        if self.rate_limiter:
+            await self.rate_limiter.acquire()
+
         task_id = await self.create_video_generation_task(prompt, reference_image_paths, resolution, aspect_ratio, fps, duration)
         video_url = await self.query_video_generation_task(task_id)
         return VideoOutput(fmt="url", ext="mp4", data=video_url)
