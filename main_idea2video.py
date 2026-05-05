@@ -1,5 +1,8 @@
 import asyncio
+from dotenv import load_dotenv
 from pipelines.idea2video_pipeline import Idea2VideoPipeline
+
+load_dotenv()
 
 
 # SET YOUR OWN IDEA, USER REQUIREMENT, AND STYLE HERE

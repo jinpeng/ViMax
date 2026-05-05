@@ -8,11 +8,11 @@ from typing import Optional, Dict, List, Tuple, Literal
 from moviepy import VideoFileClip, concatenate_videoclips
 from PIL import Image
 from agents import *
-import yaml
 from interfaces import *
 from langchain.chat_models import init_chat_model
 from tools.render_backend import RenderBackend
 from utils.provider_presets import resolve_chat_model_config
+from utils.config import load_config
 
 class Script2VideoPipeline:
 
@@ -47,8 +47,7 @@ class Script2VideoPipeline:
 
     @classmethod
     def init_from_config(cls, config_path: str):
-        with open(config_path, "r") as f:
-            config = yaml.safe_load(f)
+        config = load_config(config_path)
 
         chat_model_args = resolve_chat_model_config(config["chat_model"]["init_args"])
         chat_model = init_chat_model(**chat_model_args)

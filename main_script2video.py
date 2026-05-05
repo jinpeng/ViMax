@@ -1,5 +1,8 @@
 import asyncio
+from dotenv import load_dotenv
 from pipelines.script2video_pipeline import Script2VideoPipeline
+
+load_dotenv()
 
 
 # SET YOUR OWN SCRIPT, USER REQUIREMENT, AND STYLE HERE
